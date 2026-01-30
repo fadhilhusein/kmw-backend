@@ -39,6 +39,7 @@ exports.createBillTransaction = async (req, res) => {
         // 3. Minta Token ke Midtrans
         const transaction = await snap.createTransaction(parameter);
         const snapToken = transaction.token;
+        const redirectUrl = transaction.redirect_url;
 
         // 4. Simpan ke Database kita (PENTING!)
         await prisma.bill.create({
@@ -54,7 +55,8 @@ exports.createBillTransaction = async (req, res) => {
 
         // 5. Kirim Token ke Frontend
         res.json({
-            snapToken
+            snapToken,
+            redirectUrl
         });
 
     } catch (error) {
