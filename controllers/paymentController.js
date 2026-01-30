@@ -94,6 +94,6 @@ exports.midtransNotification = async (req, res) => {
         res.status(200).send('OK'); // Wajib balas OK ke Midtrans
 
     } catch (error) {
-        res.status(500).send('Error');
+        res.status(500).send('Terjadi kesalahan: ' + error);
     }
 };
