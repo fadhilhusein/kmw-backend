@@ -72,6 +72,7 @@ model User {
 
   // Relasi
   assignedTasks  Task[]
+  bills          Bill[]
 
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
@@ -144,4 +145,33 @@ model CrossDivisionRequest {
   createdAt      DateTime      @default(now()) @map("created_at")
 
   @@map("cross_division_requests")
+}
+
+// Status pembayaran standar Midtrans
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model Bill {
+  id          Int           @id @default(autoincrement())
+  title       String        // Misal: "Uang Kas Januari 2026"
+  amount      Int           // Misal: 20000
+  
+  // ID Unik untuk Midtrans (Order ID)
+  // Format saran: KAS-NIM-BULAN-TAHUN (agar tidak duplikat)
+  orderId     String        @unique @map("order_id")
+  
+  snapToken   String?       @map("snap_token") // Token buat popup pembayaran
+  status      PaymentStatus @default(PENDING)
+  
+  // Relasi ke User (Siapa yang bayar)
+  userId      Int           @map("user_id")
+  user        User          @relation(fields: [userId], references: [id])
+
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  @@map("bills")
 }
