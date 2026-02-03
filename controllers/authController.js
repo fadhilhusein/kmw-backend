@@ -16,6 +16,7 @@ exports.registerMember = async (req, res) => {
         const {
             name,
             nim,
+            email,
             divisionCode,
             role
         } = req.body;
@@ -42,6 +43,7 @@ exports.registerMember = async (req, res) => {
             data: {
                 name,
                 nim,
+                email,
                 divisionCode: divisionCode, // Pastikan jadi integer
                 role: role || 'STAFF',
                 activationCode,
@@ -54,6 +56,7 @@ exports.registerMember = async (req, res) => {
             data: {
                 name: newUser.name,
                 nim: newUser.nim,
+                email: newUser.email,
                 activationCode: newUser.activationCode // PENTING: Ini yang dikasih ke user
             }
         });
