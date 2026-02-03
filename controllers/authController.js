@@ -23,12 +23,13 @@ exports.registerMember = async (req, res) => {
         // Cek apakah NIM sudah ada
         const existingUser = await prisma.user.findUnique({
             where: {
-                nim
+                nim,
+                name
             }
         });
         if (existingUser) {
             return res.status(400).json({
-                error: "NIM ini sudah terdaftar."
+                error: "NIM atau Nama ini sudah terdaftar."
             });
         }
 

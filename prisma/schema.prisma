@@ -16,7 +16,7 @@ datasource db {
 // 2. Definisi ENUM (Pilihan Tetap)
 enum Role {
   KETUA
-  KADIV
+  MANAJER
   STAFF
   ADMIN
 }
