@@ -29,8 +29,9 @@ exports.registerMember = async (req, res) => {
                 OR: [
                     {nim: nim},
                     {name: name},
-                    {email: email}
+                    {email: email},
                 ]
+            }
         });
         if (existingUser) {
             return res.status(400).json({
