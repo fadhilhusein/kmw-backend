@@ -64,9 +64,8 @@ exports.registerMember = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
         res.status(500).json({
-            error: "Gagal mendaftarkan anggota."
+            error: "Gagal mendaftarkan anggota: " + error.message
         });
     }
 };
