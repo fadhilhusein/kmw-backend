@@ -155,7 +155,7 @@ exports.login = async (req, res) => {
 
         // Buat Token (Tiket masuk)
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-        const token = new jose.SignJWT({nim: user.nim, role: user.role, divisi: user.divisionCode, expiresAt})
+        const token = await new jose.SignJWT({nim: user.nim, role: user.role, divisi: user.divisionCode, expiresAt})
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt()
             .setExpirationTime('7d')
