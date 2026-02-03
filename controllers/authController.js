@@ -27,12 +27,13 @@ exports.registerMember = async (req, res) => {
         const existingUser = await prisma.user.findUnique({
             where: {
                 nim,
-                name
+                name,
+                email
             }
         });
         if (existingUser) {
             return res.status(400).json({
-                error: "NIM atau Nama ini sudah terdaftar."
+                error: "NIM atau Nama atau Email ini sudah terdaftar."
             });
         }
 
