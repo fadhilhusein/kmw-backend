@@ -26,10 +26,11 @@ exports.registerMember = async (req, res) => {
         // Cek apakah NIM sudah ada
         const existingUser = await prisma.user.findUnique({
             where: {
-                nim,
-                name,
-                email
-            }
+                OR: [
+                    {nim: nim},
+                    {name: name},
+                    {email: email}
+                ]
         });
         if (existingUser) {
             return res.status(400).json({
