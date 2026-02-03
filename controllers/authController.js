@@ -4,11 +4,13 @@ const {
 } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcrypt');
+const jose = require("jose")
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 // Kunci rahasia untuk token (Simpan di .env nanti ya, ini contoh aja)
 const JWT_SECRET = process.env.JWT_SECRET || "rahasia_negara_api";
+const encodedKey = new TextEncoder().encode(JWT_SECRET);
 
 // 1. ADMIN: Daftarkan Anggota Baru (Dapat Kode Aktivasi)
 exports.registerMember = async (req, res) => {
@@ -152,22 +154,20 @@ exports.login = async (req, res) => {
         });
 
         // Buat Token (Tiket masuk)
-        const token = jwt.sign({
-                id: user.id,
-                nim: user.nim,
-                role: user.role
-            },
-            JWT_SECRET, {
-                expiresIn: '1d'
-            }
-        );
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const token = new jose.SignJWT({nim: user.nim, role: user.role, divisi: user.divisionCode, expiresAt})
+            .setProtectedHeader({ alg: "HS256" })
+            .setIssuedAt()
+            .setExpirationTime('7d')
+            .sign(encodedKey);
 
         res.json({
             message: "Login berhasil",
             token,
             user: {
                 name: user.name,
-                role: user.role
+                role: user.role,
+                divisi: user.divisionCode
             }
         });
 
