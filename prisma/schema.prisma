@@ -1,19 +1,104 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url = env("DIRECT_URL")
+  url      = env("DIRECT_URL")
 }
 
-// 2. Definisi ENUM (Pilihan Tetap)
+model Division {
+  id               Int                    @id @default(autoincrement())
+  name             String
+  code             String                 @unique
+  sentRequests     CrossDivisionRequest[] @relation("RequesterDiv")
+  receivedRequests CrossDivisionRequest[] @relation("TargetDiv")
+  projects         Project[]
+  members          User[]
+
+  @@map("divisions")
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  name           String
+  nim            String   @unique
+  email          String?  @unique
+  password       String?
+  role           Role     @default(STAFF)
+  activationCode String?  @map("activation_code")
+  isActive       Boolean  @default(false) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  divisionCode   String   @map("division_code")
+  bills          Bill[]
+  assignedTasks  Task[]
+  division       Division @relation(fields: [divisionCode], references: [code])
+
+  @@map("users")
+}
+
+model Project {
+  id             Int                    @id @default(autoincrement())
+  title          String
+  startDate      DateTime               @map("start_date") @db.Date
+  endDate        DateTime               @map("end_date") @db.Date
+  leadDivisionId Int                    @map("lead_division_id")
+  requests       CrossDivisionRequest[]
+  leadDivision   Division               @relation(fields: [leadDivisionId], references: [id])
+  tasks          Task[]
+
+  @@map("projects")
+}
+
+model Task {
+  id             Int                   @id @default(autoincrement())
+  title          String
+  status         TaskStatus            @default(TODO)
+  dueDate        DateTime?             @map("due_date")
+  projectId      Int                   @map("project_id")
+  assignedUserId Int?                  @map("assigned_user_id")
+  createdAt      DateTime              @default(now()) @map("created_at")
+  updatedAt      DateTime              @updatedAt @map("updated_at")
+  originRequest  CrossDivisionRequest?
+  assignedUser   User?                 @relation(fields: [assignedUserId], references: [id])
+  project        Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
+
+model CrossDivisionRequest {
+  id              Int           @id @default(autoincrement())
+  description     String
+  status          RequestStatus @default(PENDING)
+  requesterDivId  Int           @map("requester_div_id")
+  targetDivId     Int           @map("target_div_id")
+  projectId       Int           @map("project_id")
+  generatedTaskId Int?          @unique @map("generated_task_id")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  generatedTask   Task?         @relation(fields: [generatedTaskId], references: [id])
+  project         Project       @relation(fields: [projectId], references: [id])
+  requesterDiv    Division      @relation("RequesterDiv", fields: [requesterDivId], references: [id])
+  targetDiv       Division      @relation("TargetDiv", fields: [targetDivId], references: [id])
+
+  @@map("cross_division_requests")
+}
+
+model Bill {
+  id        Int           @id @default(autoincrement())
+  title     String
+  amount    Int
+  orderId   String        @unique @map("order_id")
+  snapToken String?       @map("snap_token")
+  status    PaymentStatus @default(PENDING)
+  userId    Int           @map("user_id")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  user      User          @relation(fields: [userId], references: [id])
+
+  @@map("bills")
+}
+
 enum Role {
   KETUA
   MANAJER
@@ -34,144 +119,8 @@ enum RequestStatus {
   REJECTED
 }
 
-// 3. Model Tabel Utama
-
-model Division {
-  id    Int    @id @default(autoincrement())
-  name  String
-  code  String @unique // Kode harus unik, misal: "PUBDOK"
-
-  // Relasi (Back-relation)
-  members          User[]
-  projects         Project[]
-  
-  // Relasi Ganda untuk Request Antar Divisi
-  // Kita harus memberi nama relasi ("name") karena ada dua koneksi ke tabel yang sama
-  sentRequests     CrossDivisionRequest[] @relation("RequesterDiv")
-  receivedRequests CrossDivisionRequest[] @relation("TargetDiv")
-
-  @@map("divisions") // Nama tabel di database asli
-}
-
-model User {
-  id             Int     @id @default(autoincrement())
-  name           String
-  nim            String  @unique // NIM wajib unik
-  email          String? @unique // Email opsional di awal, wajib unik
-  password       String? // Boleh NULL jika akun belum diaktivasi
-  
-  // Foreign Key ke Division
-  divisionCode     String   @map("division_code")
-  division         Division @relation(fields: [divisionCode], references: [code])
-
-  role           Role    @default(STAFF)
-
-  // Fitur Aktivasi Akun (Sesuai request sebelumnya)
-  activationCode String? @map("activation_code")
-  isActive       Boolean @default(false) @map("is_active")
-
-  // Relasi
-  assignedTasks  Task[]
-  bills          Bill[]
-
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-
-  @@map("users")
-}
-
-model Project {
-  id             Int      @id @default(autoincrement())
-  title          String
-  startDate      DateTime @db.Date @map("start_date") // Hanya simpan Tanggal
-  endDate        DateTime @db.Date @map("end_date")
-  
-  // Foreign Key: Divisi Penanggung Jawab (Lead)
-  leadDivisionId Int      @map("lead_division_id")
-  leadDivision   Division @relation(fields: [leadDivisionId], references: [id])
-
-  // Relasi
-  tasks          Task[]
-  requests       CrossDivisionRequest[]
-
-  @@map("projects")
-}
-
-model Task {
-  id             Int        @id @default(autoincrement())
-  title          String
-  status         TaskStatus @default(TODO)
-  dueDate        DateTime?  @map("due_date")
-
-  // Foreign Keys
-  projectId      Int        @map("project_id")
-  project        Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  assignedUserId Int?       @map("assigned_user_id") // Boleh null jika belum ada yang mengerjakan
-  assignedUser   User?      @relation(fields: [assignedUserId], references: [id])
-
-  // Relasi Balik ke Request (One-to-One optional)
-  // Satu Task mungkin berasal dari satu Request
-  originRequest  CrossDivisionRequest?
-
-  createdAt      DateTime   @default(now()) @map("created_at")
-  updatedAt      DateTime   @updatedAt @map("updated_at")
-
-  @@map("tasks")
-}
-
-model CrossDivisionRequest {
-  id             Int           @id @default(autoincrement())
-  description    String        @db.Text
-  status         RequestStatus @default(PENDING)
-  
-  // Relasi 1: Pengirim (Requester)
-  requesterDivId Int           @map("requester_div_id")
-  requesterDiv   Division      @relation("RequesterDiv", fields: [requesterDivId], references: [id])
-
-  // Relasi 2: Penerima (Target)
-  targetDivId    Int           @map("target_div_id")
-  targetDiv      Division      @relation("TargetDiv", fields: [targetDivId], references: [id])
-
-  // Relasi 3: Terkait Project Apa
-  projectId      Int           @map("project_id")
-  project        Project       @relation(fields: [projectId], references: [id])
-
-  // Relasi 4: Task yang Terbentuk (Jika Approved)
-  // Ini One-to-One: Satu request menghasilkan satu task
-  generatedTaskId Int?         @unique @map("generated_task_id")
-  generatedTask   Task?        @relation(fields: [generatedTaskId], references: [id])
-
-  createdAt      DateTime      @default(now()) @map("created_at")
-
-  @@map("cross_division_requests")
-}
-
-// Status pembayaran standar Midtrans
 enum PaymentStatus {
   PENDING
   PAID
   FAILED
-}
-
-model Bill {
-  id          Int           @id @default(autoincrement())
-  title       String        // Misal: "Uang Kas Januari 2026"
-  amount      Int           // Misal: 20000
-  
-  // ID Unik untuk Midtrans (Order ID)
-  // Format saran: KAS-NIM-BULAN-TAHUN (agar tidak duplikat)
-  orderId     String        @unique @map("order_id")
-  
-  snapToken   String?       @map("snap_token") // Token buat popup pembayaran
-  status      PaymentStatus @default(PENDING)
-  
-  // Relasi ke User (Siapa yang bayar)
-  userId      Int           @map("user_id")
-  user        User          @relation(fields: [userId], references: [id])
-
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-
-  @@map("bills")
 }
