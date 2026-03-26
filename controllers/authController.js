@@ -8,8 +8,11 @@ const jose = require("jose")
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-// Kunci rahasia untuk token (Simpan di .env nanti ya, ini contoh aja)
-const JWT_SECRET = process.env.JWT_SECRET || "rahasia_negara_api";
+// Kunci rahasia untuk token - HARUS diset di environment variable
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required. Please set it in your .env file.');
+}
 const encodedKey = new TextEncoder().encode(JWT_SECRET);
 
 // 1. ADMIN: Daftarkan Anggota Baru (Dapat Kode Aktivasi)
@@ -39,9 +42,9 @@ exports.registerMember = async (req, res) => {
             });
         }
 
-        // Generate Kode Aktivasi (3 digit NIM + 3 digit Random)
-        const randomStr = crypto.randomBytes(2).toString('hex').toUpperCase();
-        const activationCode = `${nim.slice(-3)}${randomStr}`; // Contoh: 001A7B
+        // Generate Kode Aktivasi yang lebih kuat (3 digit NIM + 6 digit Random)
+        const randomStr = crypto.randomBytes(3).toString('hex').toUpperCase();
+        const activationCode = `${nim.slice(-3)}${randomStr}`; // Contoh: 001AB12CD
 
         // Simpan ke Database
         const newUser = await prisma.user.create({
@@ -174,8 +177,9 @@ exports.login = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Login error:', error.message);
         res.status(500).json({
-            error: "Gagal login."
+            error: "Terjadi kesalahan saat login. Silakan coba lagi."
         });
     }
 };

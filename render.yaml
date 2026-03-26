@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: kmw-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: MIDTRANS_SERVER_KEY
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+      - key: LOG_FILE_ENABLED
+        value: false
+      - key: LOG_CONSOLE_ENABLED
+        value: true
+      - key: ENABLE_MONITORING
+        value: true
+      - key: ENABLE_HEALTH_CHECK
+        value: true
+    healthCheckPath: /health
+    autoDeploy: true
+    branch: main

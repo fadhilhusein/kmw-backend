@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "D:\\laragon\\www\\kmw-backend\\logs\\.4e5da46245f773b5f3f79a110426747b5d5aa2b4-audit.json",
+    "files": [
+        {
+            "date": 1774516453640,
+            "name": "D:\\laragon\\www\\kmw-backend\\logs\\rejections.log.2026-03-26",
+            "hash": "578b56fc744a5b772ab07dbe9759c9d32bc0ef01b3f0e74e86b24dd2b343aeb8"
+        }
+    ],
+    "hashType": "sha256"
+}

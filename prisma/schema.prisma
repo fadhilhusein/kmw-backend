@@ -99,6 +99,40 @@ model Bill {
   @@map("bills")
 }
 
+model ErrorLog {
+  id              Int      @id @default(autoincrement())
+  errorId         String   @unique @map("error_id")
+  name            String
+  message         String
+  code            String?
+  status          Int      @map("status_code")
+  stackTrace      String?  @map("stack_trace")
+  userId          Int?     @map("user_id")
+  userRole        String?  @map("user_role")
+  requestMethod   String?  @map("request_method")
+  requestUrl      String?  @map("request_url")
+  requestPath     String?  @map("request_path")
+  requestIp       String?  @map("request_ip")
+  userAgent       String?  @map("user_agent")
+  context         Json?    // Additional context as JSON
+  resolved        Boolean  @default(false)
+  resolvedAt      DateTime? @map("resolved_at")
+  resolvedBy      String?  @map("resolved_by")
+  resolvedNote    String?  @map("resolved_note")
+  count           Int      @default(1) // Number of times this error occurred
+  firstOccurredAt  DateTime @default(now()) @map("first_occurred_at")
+  lastOccurredAt  DateTime @default(now()) @map("last_occurred_at")
+
+  @@index([errorId])
+  @@index([name])
+  @@index([status])
+  @@index([userId])
+  @@index([resolved])
+  @@index([firstOccurredAt])
+  @@index([lastOccurredAt])
+  @@map("error_logs")
+}
+
 enum Role {
   KETUA
   MANAJER
