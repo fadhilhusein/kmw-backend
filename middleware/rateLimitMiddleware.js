@@ -14,7 +14,7 @@ const createRateLimiter = (windowMs, max, message) => {
         handler: (req, res) => {
             res.status(429).json({
                 success: false,
-                error: 'Terlalu banyak permintaan. Silakan coba lagi nanti.'
+                error: message
             });
         }
     });
