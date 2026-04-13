@@ -309,12 +309,8 @@ exports.deleteStaff = async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Staff berhasil dinonaktifkan',
             data: {
-                id: deletedStaff.id,
-                name: deletedStaff.name,
-                nim: deletedStaff.nim,
-                isActive: deletedStaff.isActive
+                message: 'Staff berhasil dinonaktifkan'
             }
         });
 
