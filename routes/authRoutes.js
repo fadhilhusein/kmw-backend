@@ -15,7 +15,7 @@ const { requireRole, requireMinRole } = require('../middleware/roleMiddleware');
 
 // Definisi URL with validation (RATE LIMITING ENABLED for production)
 router.post('/register-member',
-    strictRateLimiter,  // Rate limit for registration
+    // strictRateLimiter,  // Rate limit for registration
     validateRegisterMember(),
     authController.registerMember // Dipakai Admin
 );
