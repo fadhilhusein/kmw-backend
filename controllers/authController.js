@@ -42,9 +42,9 @@ exports.registerMember = async (req, res) => {
             });
         }
 
-        // Generate Kode Aktivasi yang lebih kuat (3 digit NIM + 6 digit Random)
-        const randomStr = crypto.randomBytes(3).toString('hex').toUpperCase();
-        const activationCode = `${nim.slice(-3)}${randomStr}`; // Contoh: 001AB12CD
+        // Generate Kode Aktivasi yang lebih kuat (3 digit NIM + 4 digit Random)
+        const randomStr = crypto.randomBytes(2).toString('hex').toUpperCase();
+        const activationCode = `${nim.slice(-3)}${randomStr}`; // Contoh: 001ABCD
 
         // Simpan ke Database
         const newUser = await prisma.user.create({
