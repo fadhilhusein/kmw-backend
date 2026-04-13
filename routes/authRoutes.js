@@ -21,7 +21,7 @@ router.post('/register-member',
 );
 
 router.post('/activate',
-    strictRateLimiter,  // Rate limit for activation
+    // strictRateLimiter,  // Rate limit for activation
     validateActivateAccount(),
     authController.activateAccount // Dipakai Mahasiswa
 );
