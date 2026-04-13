@@ -12,6 +12,7 @@ const prisma = require('./utils/prismaClient');
 const authRoutes = require('./routes/authRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const monitoringRoutes = require('./routes/monitoringRoutes');
+const staffRoutes = require('./routes/staffRoutes');
 
 // Import security middlewares
 const { sanitizeInput, trimInput, cleanInput } = require('./middleware/sanitizeMiddleware');
@@ -100,6 +101,7 @@ if (process.env.ENABLE_MONITORING !== 'false') {
 // Routes
 app.use('/api/payment', paymentRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/staff', staffRoutes);
 app.use('/api/monitoring', monitoringRoutes);  // Monitoring endpoints
 
 // Health check endpoint (no rate limit) - Simple version
