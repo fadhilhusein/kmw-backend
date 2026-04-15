@@ -32,7 +32,6 @@ const requireMinRole = (minRole) => {
     const requiredLevel = ROLE_HIERARCHY[minRole];
 
     return (req, res, next) => {
-        console.log("Isi request", req)
         if (!req.user) {
             return res.status(401).json({
                 success: false,

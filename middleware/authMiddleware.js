@@ -13,6 +13,8 @@ const verifyToken = async (req, res, next) => {
         // Get token from header
         const authHeader = req.headers['authorization'];
 
+        console.log("Authorization Header:", authHeader); // Debug log
+
         if (!authHeader) {
             return res.status(401).json({
                 success: false,
