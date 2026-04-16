@@ -11,7 +11,7 @@ exports.getStaffList = async (req, res) => {
         const where = {};
 
         // Filter by role (exclude ADMIN from list)
-        where.role = { in: ['KETUA', 'MANAJER', 'STAFF'] };
+        where.role = { in: ['STAFF'] };
 
         // Division filter - MANAJER can only see their own division
         if (req.user.role === 'MANAJER') {
