@@ -16,19 +16,19 @@ const { requireRole, requireMinRole } = require('../middleware/roleMiddleware');
 // Definisi URL with validation (RATE LIMITING ENABLED for production)
 router.post('/register-member',
     // strictRateLimiter,  // Rate limit for registration
-    validateRegisterMember(),
+    // validateRegisterMember(),
     authController.registerMember // Dipakai Admin
 );
 
 router.post('/activate',
     // strictRateLimiter,  // Rate limit for activation
-    validateActivateAccount(),
+    // validateActivateAccount(),
     authController.activateAccount // Dipakai Mahasiswa
 );
 
 router.post('/login',
     authRateLimiter,  // Rate limit for login (stricter)
-    validateLogin(),
+    // validateLogin(),
     authController.login // Dipakai Semua
 );
 
