@@ -195,8 +195,13 @@ exports.requestPasswordReset = async (req, res) => {
             return res.status(404).json({ error: "User tidak ditemukan." });
         }
 
+        // Cek apakah user sudah generate token reset password sebelumnya dan masih valid
+        if (user.resetCode && user.resetCodeExpiry > new Date()) {
+            return res.status(400).json({ error: "Permintaan reset password sudah dibuat sebelumnya. Silakan cek email Anda." });
+        }
+
         // Generate token reset password
-        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetToken = crypto.randomBytes(2).toString('hex').toUpperCase();
         const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // Token berlaku 1 jam
 
         // Update user dengan token reset password
@@ -212,6 +217,9 @@ exports.requestPasswordReset = async (req, res) => {
         res.json({ 
             message: "Permintaan reset password berhasil. Silakan cek email Anda.",
             data: {
+                name: user.name,
+                nim: user.nim,
+                email: user.email,
                 token: resetToken, // Hanya untuk testing, sebaiknya tidak dikirim di response
             }
         });
