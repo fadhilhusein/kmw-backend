@@ -11,6 +11,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "build": "npx prisma generate",
+    "postinstall": "npx prisma generate",
     "logs:cleanup": "node scripts/logCleanup.js",
     "logs:cleanup:dry": "node scripts/logCleanup.js --dry-run"
   },
