@@ -20,20 +20,22 @@ model Division {
 }
 
 model User {
-  id             Int      @id @default(autoincrement())
-  name           String
-  nim            String   @unique
-  email          String?  @unique
-  password       String?
-  role           Role     @default(STAFF)
-  activationCode String?  @map("activation_code")
-  isActive       Boolean  @default(false) @map("is_active")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-  divisionCode   String   @map("division_code")
-  bills          Bill[]
-  assignedTasks  Task[]
-  division       Division @relation(fields: [divisionCode], references: [code])
+  id                Int       @id @default(autoincrement())
+  name              String
+  nim               String    @unique
+  email             String?   @unique
+  password          String?
+  role              Role      @default(STAFF)
+  activationCode    String?   @map("activation_code")
+  isActive          Boolean   @default(false) @map("is_active")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  divisionCode      String    @map("division_code")
+  resetCode         String?   @map("reset_code")
+  resetCodeExpiry   DateTime? @map("reset_code_expiry") @db.Timestamp(6)
+  bills             Bill[]
+  assignedTasks     Task[]
+  division          Division  @relation(fields: [divisionCode], references: [code])
 
   @@map("users")
 }
@@ -99,45 +101,13 @@ model Bill {
   @@map("bills")
 }
 
-model ErrorLog {
-  id              Int      @id @default(autoincrement())
-  errorId         String   @unique @map("error_id")
-  name            String
-  message         String
-  code            String?
-  status          Int      @map("status_code")
-  stackTrace      String?  @map("stack_trace")
-  userId          Int?     @map("user_id")
-  userRole        String?  @map("user_role")
-  requestMethod   String?  @map("request_method")
-  requestUrl      String?  @map("request_url")
-  requestPath     String?  @map("request_path")
-  requestIp       String?  @map("request_ip")
-  userAgent       String?  @map("user_agent")
-  context         Json?    // Additional context as JSON
-  resolved        Boolean  @default(false)
-  resolvedAt      DateTime? @map("resolved_at")
-  resolvedBy      String?  @map("resolved_by")
-  resolvedNote    String?  @map("resolved_note")
-  count           Int      @default(1) // Number of times this error occurred
-  firstOccurredAt  DateTime @default(now()) @map("first_occurred_at")
-  lastOccurredAt  DateTime @default(now()) @map("last_occurred_at")
-
-  @@index([errorId])
-  @@index([name])
-  @@index([status])
-  @@index([userId])
-  @@index([resolved])
-  @@index([firstOccurredAt])
-  @@index([lastOccurredAt])
-  @@map("error_logs")
-}
-
 enum Role {
   KETUA
   MANAJER
+  WAKIL_MANAJER
   STAFF
   ADMIN
+  WAKIL_KETUA
 }
 
 enum TaskStatus {

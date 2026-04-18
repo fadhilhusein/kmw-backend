@@ -3,9 +3,6 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 
-// Import validation middlewares
-const { validateRegisterMember, validateActivateAccount, validateLogin } = require('../middleware/validationMiddleware');
-
 // Import rate limiting
 const { strictRateLimiter, authRateLimiter } = require('../middleware/rateLimitMiddleware');
 
@@ -16,21 +13,23 @@ const { requireRole, requireMinRole } = require('../middleware/roleMiddleware');
 // Definisi URL with validation (RATE LIMITING ENABLED for production)
 router.post('/register-member',
     // strictRateLimiter,  // Rate limit for registration
-    // validateRegisterMember(),
     authController.registerMember // Dipakai Admin
 );
 
 router.post('/activate',
     // strictRateLimiter,  // Rate limit for activation
-    // validateActivateAccount(),
     authController.activateAccount // Dipakai Mahasiswa
 );
 
 router.post('/login',
     authRateLimiter,  // Rate limit for login (stricter)
-    // validateLogin(),
     authController.login // Dipakai Semua
 );
+
+router.post("/reset-password",
+    authRateLimiter, // Rate limit untuk reset password
+    authController.requestPasswordReset // Dipakai Semua
+)
 
 // Example of protected route (to be implemented)
 // router.get('/me', verifyToken, authController.getProfile);

@@ -183,3 +183,41 @@ exports.login = async (req, res) => {
         });
     }
 };
+
+// 4: Mekanisme Reset Passwrd
+exports.requestPasswordReset = async (req, res) => {
+    try {
+        const { nim } = req.body;
+
+        // Find user
+        const user = await prisma.user.findUnique({ where: { nim } });
+        if (!user) {
+            return res.status(404).json({ error: "User tidak ditemukan." });
+        }
+
+        // Generate token reset password
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // Token berlaku 1 jam
+
+        // Update user dengan token reset password
+        await prisma.user.update({
+            where: { nim },
+            data: {
+                resetCode: resetToken,
+                resetCodeExpiry: resetTokenExpiry
+            }
+        });
+
+        // Kirim token yang sudah disimpan
+        res.json({ 
+            message: "Permintaan reset password berhasil. Silakan cek email Anda.",
+            data: {
+                token: resetToken, // Hanya untuk testing, sebaiknya tidak dikirim di response
+            }
+        });
+
+    } catch (error) {
+        console.error('Reset password error:', error.message);
+        res.status(500).json({ error: "Terjadi kesalahan saat memproses permintaan reset password." });
+    }
+};
