@@ -28,7 +28,12 @@ router.post('/login',
 
 router.post("/reset-password",
     authRateLimiter, // Rate limit untuk reset password
-    authController.requestPasswordReset // Dipakai Semua
+    authController.requestPasswordResetToken // Dipakai Semua
+)
+
+router.post("/confirm-reset-password",
+    authRateLimiter, // Rate limit untuk konfirmasi reset password
+    authController.confirmPasswordReset // Dipakai Semua
 )
 
 // Example of protected route (to be implemented)

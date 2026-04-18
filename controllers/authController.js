@@ -11,7 +11,7 @@ const crypto = require('crypto');
 // Kunci rahasia untuk token - HARUS diset di environment variable
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required. Please set it in your .env file.');
+    throw new Error('JWT_SECRET environment variable is required. Please set it in your .env file.');
 }
 const encodedKey = new TextEncoder().encode(JWT_SECRET);
 
@@ -29,10 +29,15 @@ exports.registerMember = async (req, res) => {
         // Cek apakah NIM sudah ada
         const existingUser = await prisma.user.findFirst({
             where: {
-                OR: [
-                    {nim: nim},
-                    {name: name},
-                    {email: email},
+                OR: [{
+                        nim: nim
+                    },
+                    {
+                        name: name
+                    },
+                    {
+                        email: email
+                    },
                 ]
             }
         });
@@ -160,8 +165,16 @@ exports.login = async (req, res) => {
 
         // Buat Token (Tiket masuk)
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-        const token = await new jose.SignJWT({nim: user.nim, role: user.role, divisi: user.divisionCode, name: user.name, expiresAt})
-            .setProtectedHeader({ alg: "HS256" })
+        const token = await new jose.SignJWT({
+                nim: user.nim,
+                role: user.role,
+                divisi: user.divisionCode,
+                name: user.name,
+                expiresAt
+            })
+            .setProtectedHeader({
+                alg: "HS256"
+            })
             .setIssuedAt()
             .setExpirationTime('7d')
             .sign(encodedKey);
@@ -185,19 +198,29 @@ exports.login = async (req, res) => {
 };
 
 // 4: Mekanisme Reset Passwrd
-exports.requestPasswordReset = async (req, res) => {
+exports.requestPasswordResetToken = async (req, res) => {
     try {
-        const { nim } = req.body;
+        const {
+            nim
+        } = req.body;
 
         // Find user
-        const user = await prisma.user.findUnique({ where: { nim } });
+        const user = await prisma.user.findUnique({
+            where: {
+                nim
+            }
+        });
         if (!user) {
-            return res.status(404).json({ error: "User tidak ditemukan." });
+            return res.status(404).json({
+                error: "User tidak ditemukan."
+            });
         }
 
         // Cek apakah user sudah generate token reset password sebelumnya dan masih valid
         if (user.resetCode && user.resetCodeExpiry > new Date()) {
-            return res.status(400).json({ error: "Permintaan reset password sudah dibuat sebelumnya. Silakan cek email Anda." });
+            return res.status(400).json({
+                error: "Permintaan reset password sudah dibuat sebelumnya. Silakan cek email Anda."
+            });
         }
 
         // Generate token reset password
@@ -206,7 +229,9 @@ exports.requestPasswordReset = async (req, res) => {
 
         // Update user dengan token reset password
         await prisma.user.update({
-            where: { nim },
+            where: {
+                nim
+            },
             data: {
                 resetCode: resetToken,
                 resetCodeExpiry: resetTokenExpiry
@@ -214,7 +239,7 @@ exports.requestPasswordReset = async (req, res) => {
         });
 
         // Kirim token yang sudah disimpan
-        res.json({ 
+        res.json({
             message: "Permintaan reset password berhasil. Silakan cek email Anda.",
             data: {
                 name: user.name,
@@ -226,6 +251,60 @@ exports.requestPasswordReset = async (req, res) => {
 
     } catch (error) {
         console.error('Reset password error:', error.message);
-        res.status(500).json({ error: "Terjadi kesalahan saat memproses permintaan reset password." });
+        res.status(500).json({
+            error: "Terjadi kesalahan saat memproses permintaan reset password."
+        });
+    }
+};
+
+exports.confirmPasswordReset = async (req, res) => {
+    try {
+        const {
+            nim,
+            token,
+            password
+        } = req.body;
+
+        const user = await prisma.user.findUnique({
+            where: {
+                nim
+            }
+        });
+
+        // Cek apakah nim ada di database
+        if (!user) {
+            return res.status(404).json({
+                error: "User tidak ditemukan."
+            });
+        }
+
+        // Cek apakah token yang user berikan masih valid dan sesuai
+        if (!user.resetCode || user.resetCode !== token || user.resetCodeExpiry < new Date()) {
+            return res.status(400).json({ 
+                error: "Token reset password tidak valid atau sudah expired." 
+            });
+        }
+
+        // Jika token valid, update password user
+        await prisma.user.update({
+            where: {
+                nim
+            },
+            data: {
+                password: await bcrypt.hash(password, 10),
+                resetCode: null,
+                resetCodeExpiry: null
+            }
+        });
+
+        res.json({
+            message: "Password berhasil direset. Silakan login dengan password baru Anda."
+        });
+
+    } catch (errors) {
+        console.error('Reset password error:', errors.message);
+        res.status(500).json({
+            error: "Terjadi kesalahan saat memproses permintaan reset password."
+        });
     }
 };
