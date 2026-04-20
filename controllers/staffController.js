@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 // 1. GET /api/staff - Get staff list with filters
 exports.getStaffList = async (req, res) => {
     try {
-        const { divisionCode, isActive, search, page = 1, limit = 10 } = req.query;
+        const { divisionCode, isActive, search, page = 1, limit = 25 } = req.query;
 
         // Build where clause
         const where = {};
