@@ -59,7 +59,6 @@ exports.getStaffList = async (req, res) => {
                     name: 'asc'
                 },
                 skip,
-                take
             }),
             prisma.user.count({ where })
         ]);
